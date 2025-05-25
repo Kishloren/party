@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Labyrinthe Tactile Chronométré</title>
+  <style>
+    body {
+      margin: 0;
+      background: #fafafa;
+      touch-action: none;
+      font-family: sans-serif;
+    }
+    canvas {
+      display: block;
+      margin: auto;
+      background: #fff;
+      border: 2px solid black;
+      touch-action: none;
+    }
+    #overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(250, 250, 250, 0.95);
+      font-size: 80px;
+      z-index: 2;
+    }
+    #timer {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      font-weight: bold;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+<div id="overlay">5</div>
+<div id="timer" style="display: none;">Temps : 0.0s</div>
+<canvas id="mazeCanvas" width="600" height="600" style="display: none;"></canvas>
+
+<script>
+  const canvas = document.getElementById('mazeCanvas');
+  const ctx = canvas.getContext('2d');
+  const overlay = document.getElementById('overlay');
+  const timerDisplay = document.getElementById('timer');
+
+  const cols = 15, rows = 15;
+  const cellSize = canvas.width / cols;
+
+  class Cell {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.walls = { top: true, right: true, bottom: true, left: true };
+      this.visited = false;
+    }
+
+    draw(ctx) {
+      const x = this.x * cellSize;
+      const y = this.y * cellSize;
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = 2;
+
+      if (this.walls.top) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + cellSize, y); ctx.stroke(); }
+      if (this.walls.right) { ctx.beginPath(); ctx.moveTo(x + cellSize, y); ctx.lineTo(x + cellSize, y + cellSize); ctx.stroke(); }
+      if (this.walls.bottom) { ctx.beginPath(); ctx.moveTo(x + cellSize, y + cellSize); ctx.lineTo(x, y + cellSize); ctx.stroke(); }
+      if (this.walls.left) { ctx.beginPath(); ctx.moveTo(x, y + cellSize); ctx.lineTo(x, y); ctx.stroke(); }
+    }
+
+    highlight(ctx, color) {
+      const x = this.x * cellSize;
+      const y = this.y * cellSize;
+      ctx.fillStyle = color;
+      ctx.fillRect(x + 2, y + 2, cellSize - 4, cellSize - 4);
+    }
+  }
+
+  const grid = [];
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      grid.push(new Cell(x, y));
+    }
+  }
+
+  function index(x, y) {
+    if (x < 0 || y < 0 || x >= cols || y >= rows) return null;
+    return x + y * cols;
+  }
+
+  function getNeighbors(cell) {
+    const neighbors = [];
+    const { x, y } = cell;
+    const directions = [
+      { dx: 0, dy: -1, wall: 'top', opposite: 'bottom' },
+      { dx: 1, dy: 0, wall: 'right', opposite: 'left' },
+      { dx: 0, dy: 1, wall: 'bottom', opposite: 'top' },
+      { dx: -1, dy: 0, wall: 'left', opposite: 'right' },
+    ];
+    for (const { dx, dy, wall, opposite } of directions) {
+      const neighbor = grid[index(x + dx, y + dy)];
+      if (neighbor && !neighbor.visited) {
+        neighbors.push({ cell: neighbor, wall, opposite });
+      }
+    }
+    return neighbors;
+  }
+
+  function removeWalls(current, next, wall, opposite) {
+    current.walls[wall] = false;
+    next.walls[opposite] = false;
+  }
+
+  function generateMaze() {
+    const stack = [];
+    const start = grid[0];
+    start.visited = true;
+    stack.push(start);
+    while (stack.length > 0) {
+      const current = stack[stack.length - 1];
+      const neighbors = getNeighbors(current);
+      if (neighbors.length > 0) {
+        const rand = Math.floor(Math.random() * neighbors.length);
+        const { cell: next, wall, opposite } = neighbors[rand];
+        removeWalls(current, next, wall, opposite);
+        next.visited = true;
+        stack.push(next);
+      } else {
+        stack.pop();
+      }
+    }
+  }
+
+  function drawMaze() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const cell of grid) {
+      cell.draw(ctx);
+    }
+    grid[0].highlight(ctx, 'green'); // entrée
+    grid[grid.length - 1].highlight(ctx, 'red'); // sortie
+  }
+
+  // === PARCOURS ===
+  let path = [grid[0]];
+  let currentCell = grid[0];
+  let timer = 0;
+  let timerInterval = null;
+  let finished = false;
+
+  function cellFromCoords(x, y) {
+    const col = Math.floor(x / cellSize);
+    const row = Math.floor(y / cellSize);
+    return grid[index(col, row)];
+  }
+
+  function isNeighborAllowed(from, to) {
+    if (!to) return false;
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    if (Math.abs(dx) + Math.abs(dy) !== 1) return false;
+    if (dx === 1 && !from.walls.right) return true;
+    if (dx === -1 && !from.walls.left) return true;
+    if (dy === 1 && !from.walls.bottom) return true;
+    if (dy === -1 && !from.walls.top) return true;
+    return false;
+  }
+
+  function redrawPath() {
+    drawMaze();
+    for (const cell of path) {
+      cell.highlight(ctx, '#87cefa'); // fil d'Ariane
+    }
+    currentCell.highlight(ctx, 'blue'); // position actuelle
+  }
+
+  canvas.addEventListener('touchstart', (e) => e.preventDefault());
+
+  canvas.addEventListener('touchmove', (e) => {
+    if (finished) return;
+
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    const touchedCell = cellFromCoords(x, y);
+    if (!touchedCell || touchedCell === currentCell) return;
+
+    const idxInPath = path.indexOf(touchedCell);
+
+    if (idxInPath !== -1) {
+      path = path.slice(0, idxInPath + 1);
+      currentCell = touchedCell;
+    } else if (isNeighborAllowed(currentCell, touchedCell)) {
+      path.push(touchedCell);
+      currentCell = touchedCell;
+    }
+
+    redrawPath();
+
+    // Victoire !
+    if (currentCell === grid[grid.length - 1]) {
+      clearInterval(timerInterval);
+      finished = true;
+      timerDisplay.textContent = `Fini ! Temps : ${timer.toFixed(1)}s`;
+      timerDisplay.style.color = 'green';
+    }
+  }, { passive: false });
+
+  // === COMPTE À REBOURS & INITIALISATION ===
+  generateMaze();
+  drawMaze(); // important pour preload, sera effacé
+
+  let countdown = 5;
+  overlay.textContent = countdown;
+
+  const countdownInterval = setInterval(() => {
+    countdown--;
+    if (countdown > 0) {
+      overlay.textContent = countdown;
+    } else {
+      clearInterval(countdownInterval);
+      overlay.style.display = 'none';
+      canvas.style.display = 'block';
+      timerDisplay.style.display = 'block';
+
+      drawMaze();
+      redrawPath();
+
+      // Démarrer le chronomètre
+      timerInterval = setInterval(() => {
+        timer += 0.1;
+        timerDisplay.textContent = `Temps : ${timer.toFixed(1)}s`;
+      }, 100);
+    }
+  }, 1000);
+</script>
+</body>
+</html>
