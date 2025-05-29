@@ -1,209 +1,208 @@
-const gridSize = 5;
-const grid = document.getElementById("grid");
-let seed = Date.now().toString().slice(-6);
-let rng = mulberry32(hashCode(seed));
+const rows = 5;
+const cols = 5;
 
-let solutionGrid = []; // solution correcte : type et angle
-let currentGrid = [];  // état actuel affiché
+// Directions pour construire le chemin
+const directions = [
+  { dx: 0, dy: -1, name: "top" },
+  { dx: 1, dy: 0, name: "right" },
+  { dx: 0, dy: 1, name: "bottom" },
+  { dx: -1, dy: 0, name: "left" },
+];
 
-function restartGame() {
-  seed = prompt("Entrez une seed ou laissez vide pour aléatoire:", seed) || Date.now().toString().slice(-6);
-  rng = mulberry32(hashCode(seed));
-  generatePuzzle();
-}
-
-function getDirection(from, to) {
-  const dx = to.x - from.x;
-  const dy = to.y - from.y;
-
-  if (dx === 1) return 'E';
-  if (dx === -1) return 'W';
-  if (dy === 1) return 'S';
-  if (dy === -1) return 'N';
-
-  return null;
-}
-
-function generatePuzzle() {
-  grid.innerHTML = "";
-  grid.style.gridTemplateColumns = `repeat(${gridSize}, 60px)`;
-
-  solutionGrid = [];
-  currentGrid = [];
-
-  const path = generatePath();
-
-  for (let y = 0; y < gridSize; y++) {
-    for (let x = 0; x < gridSize; x++) {
-      const index = y * gridSize + x;
-      const cell = document.createElement("div");
-      cell.className = "cell pipe";
-      cell.dataset.index = index;
-
-      let type = "straight";
-      let correctAngle = 0;
-
-      const inPath = path.find(p => p.x === x && p.y === y);
-      if (inPath) {
-        const { prev, next } = inPath;
-
-        const d1 = getDirection(prev, inPath);
-        const d2 = getDirection(inPath, next);
-
-        // Mapping directions to type + angle
-        const key = `${d1}${d2}`;
-
-        const pipeMap = {
-          'NS': { type: 'straight', angle: 0 },
-          'SN': { type: 'straight', angle: 0 },
-          'EW': { type: 'straight', angle: 90 },
-          'WE': { type: 'straight', angle: 90 },
-
-          'NE': { type: 'curve', angle: 0 },
-          'ES': { type: 'curve', angle: 90 },
-          'SW': { type: 'curve', angle: 180 },
-          'WN': { type: 'curve', angle: 270 },
-
-          'EN': { type: 'curve', angle: 270 },
-          'SE': { type: 'curve', angle: 0 },
-          'WS': { type: 'curve', angle: 90 },
-          'NW': { type: 'curve', angle: 180 },
-        };
-
-        const match = pipeMap[key];
-
-        if (match) {
-          type = match.type;
-          correctAngle = match.angle;
-        } else {
-          // fallback
-          type = "straight";
-          correctAngle = 0;
-        }
-
-        solutionGrid[index] = { type, angle: correctAngle };
-      } else {
-        // Cell not in path: random pipe
-        type = rng() > 0.5 ? "straight" : "curve";
-        correctAngle = Math.floor(rng() * 4) * 90;
-        solutionGrid[index] = { type, angle: correctAngle };
-      }
-
-      // User scrambled angle
-      const currentAngle = (solutionGrid[index].angle + Math.floor(rng() * 4) * 90) % 360;
-      currentGrid[index] = currentAngle;
-
-      cell.dataset.type = type;
-      cell.dataset.angle = currentAngle;
-      cell.style.transform = `rotate(${currentAngle}deg)`;
-
-      if (index === 0) cell.classList.add("start");
-      if (index === gridSize * gridSize - 1) cell.classList.add("end");
-
-      const svg = createPipeSVG(type);
-      cell.appendChild(svg);
-
-      cell.addEventListener("click", () => {
-        currentGrid[index] = (parseInt(currentGrid[index]) + 90) % 360;
-        cell.dataset.angle = currentGrid[index];
-        cell.style.transform = `rotate(${currentGrid[index]}deg)`;
-      });
-
-      grid.appendChild(cell);
-    }
-  }
-}
-
-
-
-function createPipeSVG(type) {
-  const svgNS = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(svgNS, "svg");
-  svg.setAttribute("viewBox", "0 0 100 100");
-  svg.setAttribute("width", "100%");
-  svg.setAttribute("height", "100%");
-
-  const path = document.createElementNS(svgNS, "path");
-  path.setAttribute("fill", "none");
-  path.setAttribute("stroke", "#01579b");
-  path.setAttribute("stroke-width", "20");
-  path.setAttribute("stroke-linecap", "round");
-
-  if (type === "straight") {
-    // Tuyau droit vertical par défaut
-    path.setAttribute("d", "M 50 0 L 50 100");
-  } else if (type === "curve") {
-    // Tuyau courbe : gauche -> centre -> haut (segments droits)
-    path.setAttribute("d", "M 0 50 L 50 50 L 50 0");
-    
-  }
-
-  svg.appendChild(path);
-  return svg;
-}
-
-
-function showSolution() {
-  for (let i = 0; i < solutionGrid.length; i++) {
-    const cell = grid.children[i];
-    const solution = solutionGrid[i];
-    cell.style.transform = `rotate(${solution.angle}deg)`;
-    cell.dataset.angle = solution.angle;
-    currentGrid[i] = solution.angle;
-  }
-}
-
-function generatePath() {
-  const path = [];
-  let x = 0, y = 0;
-  path.push({ x, y });
-
-  while (x !== gridSize - 1 || y !== gridSize - 1) {
-    const directions = [];
-    if (x < gridSize - 1) directions.push({ x: x + 1, y });
-    if (y < gridSize - 1) directions.push({ x, y: y + 1 });
-
-    const next = directions[Math.floor(rng() * directions.length)];
-    path.push({ ...next });
-    x = next.x;
-    y = next.y;
-  }
-
-  for (let i = 0; i < path.length; i++) {
-    path[i].prev = path[i - 1] || path[i];
-    path[i].next = path[i + 1] || path[i];
-  }
-
-  debugger;
-  //document.getElementById('debug').innerHTML = path;
-  return path;
-}
-
-function getCurveRotation(dir1, dir2) {
-  const dirs = [dir1, dir2].sort(); // assure un ordre stable
-  if (dirs.includes(0) && dirs.includes(3)) return 0;   // OUEST-NORD
-  if (dirs.includes(0) && dirs.includes(1)) return 90;  // NORD-EST
-  if (dirs.includes(1) && dirs.includes(2)) return 180; // EST-SUD
-  if (dirs.includes(2) && dirs.includes(3)) return 270; // SUD-OUEST
-  return 0; // fallback
-}
-
-// Seed-based PRNG
-function mulberry32(a) {
+// RNG basique pour seed
+function createRNG(seed) {
+  let x = seed % 2147483647;
+  if (x <= 0) x += 2147483646;
   return function () {
-    var t = (a += 0x6d2b79f5);
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    x = (x * 16807) % 2147483647;
+    return (x - 1) / 2147483646;
   };
 }
 
-function hashCode(str) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
-  }
-  return h;
+// Retourne type+rotation pour un tableau de connexions (2 directions max)
+function getTileTypeFromConnections(conns) {
+  if (conns.length !== 2) return { type: "empty", rot: 0 };
+
+  const sorted = conns.slice().sort();
+  const key = sorted.join("-");
+
+  const map = {
+    "bottom-top": { type: "straight", rot: 0 },
+    "left-right": { type: "straight", rot: 90 },
+    "right-top": { type: "curve", rot: 0 },
+    "bottom-right": { type: "curve", rot: 90 },
+    "bottom-left": { type: "curve", rot: 180 },
+    "left-top": { type: "curve", rot: 270 }
+  };
+
+  return map[key] || { type: "empty", rot: 0 };
 }
 
-restartGame();
+// Classe Tile : pour SVG et stockage
+class Tile {
+  constructor(x, y, type, rot) {
+    this.x = x;
+    this.y = y;
+    this.type = type;
+    this.rot = rot; // en degrés : 0, 90, 180, 270
+  }
+
+  symbol() {
+    if (this.type === "straight") {
+      return `
+      <svg viewBox="0 0 100 100" >
+        <rect x="45" y="0" width="10" height="100" fill="#006064"/>
+      </svg>`;
+    }
+    if (this.type === "curve") {
+      return `
+      <svg viewBox="0 0 100 100" >
+        <path d="M 50 0 L 50 50 L 100 50" stroke="#006064" stroke-width="10" fill="none" stroke-linejoin="round" />
+      </svg>`;
+    }
+    return "";
+  }
+}
+
+// Génération du puzzle : chemin Hamiltonien avec 2 connexions par case, sans T ni croix
+function generatePuzzle(rows, cols, seed) {
+  const rng = createRNG(seed);
+  const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
+  const connections = Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () => [])
+  );
+
+  const path = [];
+
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  function dfs(x, y, count) {
+    if (count === rows * cols) return true;
+
+    visited[y][x] = true;
+    path.push({ x, y });
+
+    const dirs = shuffle([...directions]);
+
+    for (const { dx, dy, name } of dirs) {
+      const nx = x + dx;
+      const ny = y + dy;
+
+      if (
+        nx >= 0 &&
+        ny >= 0 &&
+        nx < cols &&
+        ny < rows &&
+        !visited[ny][nx]
+      ) {
+        // Connexions bidirectionnelles
+        connections[y][x].push(name);
+        const opposite = directions.find(d => d.dx === -dx && d.dy === -dy).name;
+        connections[ny][nx].push(opposite);
+
+        if (dfs(nx, ny, count + 1)) {
+          return true;
+        }
+
+        // Backtrack
+        connections[y][x].pop();
+        connections[ny][nx].pop();
+      }
+    }
+
+    visited[y][x] = false;
+    path.pop();
+    return false;
+  }
+
+  dfs(0, 0, 1);
+
+  const tiles = [];
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const conns = connections[y][x];
+      const { type, rot } = getTileTypeFromConnections(conns);
+      tiles.push({ x, y, type, rot });
+    }
+  }
+
+  return {
+    tiles,
+    start: path[0],
+    end: path[path.length - 1]
+  };
+}
+
+// Applique une rotation aléatoire multiple de 90° à chaque tuile au démarrage
+function randomizeRotations(tiles, rng) {
+  for (const tile of tiles) {
+    const steps = Math.floor(rng() * 4); // 0,1,2,3
+    tile.rot = (tile.rot + steps * 90) % 360;
+  }
+}
+
+// Vérifie que toutes les tuiles sont dans la bonne orientation (celle générée)
+function checkSolution(currentTiles, solutionTiles) {
+  for (let i = 0; i < currentTiles.length; i++) {
+    if(currentTiles[i].type=='curve' && currentTiles[i].rot%360 !== solutionTiles[i].rot%360) {
+      return false;
+    }    
+    if(currentTiles[i].type=='straight' && currentTiles[i].rot%180 !== solutionTiles[i].rot%180) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// Affichage de la grille et gestion des clics
+function drawGrid(puzzle) {
+  const { tiles, start, end } = puzzle;
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  grid.style.gridTemplateColumns = `repeat(${cols}, 60px)`;
+
+  for (const tile of tiles) {
+    const el = document.createElement("div");
+    el.className = "tile";
+    el.innerHTML = new Tile(tile.x, tile.y, tile.type, tile.rot).symbol();
+    el.style.transform = `rotate(${tile.rot}deg)`;
+
+    if (tile.x === start.x && tile.y === start.y) el.classList.add("start");
+    if (tile.x === end.x && tile.y === end.y) el.classList.add("end");
+
+    el.addEventListener("click", () => {
+      tile.rot = (tile.rot + 90);
+      el.style.transform = `rotate(${tile.rot}deg)`;
+
+      if (checkSolution(puzzle.tiles, solution.tiles)) {
+        alert("🎉 Félicitations, tu as reconstitué le circuit !");
+      }
+    });
+
+    grid.appendChild(el);
+  }
+}
+
+// --- Initialisation ---
+
+const seed = 12345;
+const rng = createRNG(seed);
+
+const solution = generatePuzzle(rows, cols, seed);
+
+// Cloner les tiles pour la partie en cours (rotation modifiable)
+const puzzle = {
+  tiles: solution.tiles.map(t => ({ ...t })),
+  start: solution.start,
+  end: solution.end
+};
+
+randomizeRotations(puzzle.tiles, rng);
+
+drawGrid(puzzle);
