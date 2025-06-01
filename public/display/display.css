@@ -1,0 +1,290 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: Coolvetica;
+    line-height: 1.6;
+    margin: 0;
+    display: grid;
+    grid-template-rows: 70px 1fr 30px;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    font-family: Coolvetica;
+    color: var(--primary);
+    padding: 0.375rem;    
+    font-size: 20pt;
+    z-index: 999;
+  
+  }
+  .spacer{
+    display: flex;
+    flex: 1 1 auto;
+  }
+
+  h2 {
+    text-align: center;
+  }
+
+  .stans-games{
+    border-radius: 100%;
+    border: 4px solid var(--secondary);
+  }
+  
+  main {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: 0.29fr 0.42fr 0.29fr;
+    height: calc(100vh - 70px - 30px);
+  }
+ 
+  .left-column,
+  .right-column {
+    color: var(--background);
+    padding: 15px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    overflow-y: hidden;
+  }
+  
+  .left-column table.scroll{
+    animation: scrollVertical 20s linear infinite;
+  }
+
+  .left-column table.scroll:hover{
+    animation-play-state: paused;
+  }
+
+  .left-column table.scroll.pause-scroll{
+    animation-play-state: paused;
+  }
+  
+  @keyframes scrollVertical {
+    0% {
+      transform: translateY(0);
+    }
+    25% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(-105%);
+    }
+  }
+  
+  .middle-column {
+    box-sizing: border-box;
+    align-content: center;
+    text-align: center;
+  }
+  
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+  
+  .right-column {
+    position: relative; /* Make the text-container relatively positioned */
+    text-align: center;
+  }
+  
+  .text-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 15px;
+    margin : 20px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    overflow: hidden;
+    border : 2px solid;
+  }
+
+  #audioPlayer, #audioPlayer2 {
+    display:none;
+  }
+
+  #question {
+    font-size : 36px;
+  }
+
+  #compteARebours {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+    font-size : 576px;
+    text-shadow: -10px 0 0 white, 0 10px 0 white, 10px 0 0 white, 0 -10px 0 white;
+    color : blue;
+    font-weight: bolder;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  .top {
+    text-align: center;
+    font-size : 48px;
+    padding-bottom: 20px;;
+  }
+
+  .middle {
+    align-self: center;
+    display: flex;
+    text-align: center;
+    align-items: center; /* Center the image vertically */
+    justify-content: center; /* Center the image horizontally */
+  }
+
+  .imageCentrale {
+    height: 700px;
+    width: 700px;
+    border-radius: 20px;
+    border: 2px solid black;
+  }
+
+  .bottom {
+    padding: 10px;
+    text-align: center;
+    display: flex;
+    align-items: center; /* Center the image vertically */
+    justify-content: center; /* Center the image horizontally */
+  }
+  .nbReponses {
+    flex: 1 1 10%; /* Change this line */
+    text-align: center;
+    font-size: 48px;
+    font-weight: bolder;
+    padding: 0;
+    margin: 0;
+    border-radius:30px;
+  }
+  .conteneurCompteur {
+    display: flex;
+    justify-content: center;
+
+  }
+  .timer {
+    padding: 10px;
+    padding-top: 30px;
+    text-align: center;
+    width: 60px;
+  }
+  .compteurs {
+    font-size : 36px;
+    width:300px;
+  }
+
+  .nbBonnesReponses {
+    padding-top: 30px;
+    color : #00FF00;
+  }
+
+  .nbMauvaisesReponses {
+    padding-top: 30px;
+    color : #FF0000;
+  }
+
+  .joueurOr {
+    font-size: 32px;
+    font-weight: bold;
+    color: #eaa606;
+  }
+
+  .joueurArgent {
+    font-size: 30px;
+    font-weight: bold;
+    color: #dbe5ea;
+  }
+
+  .joueurBronze {
+    font-size: 28px;
+    font-weight: bold;
+    color: #da6a0b;
+  }
+
+  .resteGagnants {
+    font-size:24px;
+    font-weight: bold;
+    color: #c4d851;
+  }
+
+  .plusDeGagnant {
+    text-align : center;
+  }
+
+  .etCestTout {
+    font-size: 28px;
+  }
+
+  .listeJoueurs {
+    font-size: 24px;
+    width: 100%;
+  }
+
+  .listeJoueurs .pseudoScore{
+    width: 40%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-all;
+  }  
+    
+  .listeJoueurs tr td{
+    padding: 0.375rem;
+  }
+
+  .tempsMoyenScore {
+    font-size: 18px;
+    text-align: right;
+  }
+
+  .progressionScore {
+    text-align: right;
+  }
+
+  .nbPointsScore {
+    font-weight: bold;
+  }
+
+  .nbMedaillesScore {
+    text-align : center;
+  }
+
+  .medailleOr {
+    color: #eaa606;
+  }
+
+  .medailleArgent {
+    color: #dbe5ea;
+  }
+
+  .medailleBronze {
+    color: #da6a0b;
+  }
+
+  .splashscreen {
+    position: absolute;
+    top : 0;
+    left: 0;
+    z-index: 100000;
+    cursor: pointer;
+  }
+

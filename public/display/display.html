@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oyez, Oh Yeah !</title>
+    <link rel="stylesheet" href="./display.css">
+    <link rel="stylesheet" href="../commonStyle.css"> 
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="../globals.js"></script>    
+    <script src="./display.js"></script>
+</head>
+<body class="gradient">
+  <img width=1920 height=1080 src="../assets/images/generiqueW.png" onClick="cacherSplashscreen()" class="splashscreen" id="splashscreen" />
+  <header>
+    <h1>Stan Party</h1>
+    <span class="spacer"></span>
+    <div class="flex items-center g-1">
+        <span>Stan's Games - 2025</span>
+        <img src="../assets/images/StansGames.jpg" width="50" height="50" class="stans-games">
+    </div>
+  </header>
+  <main>
+    <section class="left-column" id="colJoueurs">
+        <table class="listeJoueurs text-with-stroke" id="listeScores">
+        </table>
+    </section>
+    <div class="middle-column">
+        <div class="container">
+            <div id="info" class="top neon-static">&nbsp;</div>
+            <div class="middle">
+                <img id="imageCentrale" class="imageCentrale" width="700" height="700" src="../assets/images/qrcode.png">
+            </div>
+            <div id="conteneurCompteurs" class="conteneurCompteur">
+                <div id="compteurs" class="compteurs bottom">
+                    <div id="nbBonnesReponses" class="nbReponses nbBonnesReponses">00</div>
+                    <div id="timer" class="timer">00</div>
+                    <div id="nbMauvaisesReponses" class="nbReponses nbMauvaisesReponses">00</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <section class="right-column">
+        <div id="resultatCoup">
+
+        </div>
+    </section>
+  </main>
+  <footer>
+    
+  </footer>
+  <audio id="audioPlayer" controls>
+    <source type="audio/mpeg" />
+  </audio>  
+  <audio id="audioPlayer2" controls>
+    <source type="audio/mpeg" />
+  </audio>
+  <div id="compteARebours" class="compteARebours"></div>
+</body>
+</html>
