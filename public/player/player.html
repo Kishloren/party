@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Joueur</title>
+    <link rel="stylesheet" href="./player.css">
+    <link rel="stylesheet" href="../commonStyle.css">
+    <script src="../assets/avataaars/avataaars.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./player.js"></script>
+    <script src="../globals.js"></script>
+</head> 
+<body>
+    <header>
+        <div id="pseudo"></div>
+        <div id="testAvatar" onClick="customizeAvatar()"></div>
+    </header>
+    <div class="iframe-container">
+        <iframe class="cache" id="avatarFrame" src="empty.html"></iframe>
+        <iframe id="gameFrame" src="titre.html"></iframe>
+    </div>
+    <footer>
+        Stan's Games 2025
+    </footer>
+
+
+</body>
+</html>
+  <script>
+    // Fallback JS si 100dvh ne fonctionne pas correctement
+    function adjustHeightFallback() {
+      const header = document.querySelector("header");
+      const footer = document.querySelector("footer");
+      const container = document.getElementById("iframeContainer");
+
+      const totalHeight = window.innerHeight;
+      const headerHeight = header.offsetHeight;
+      const footerHeight = footer.offsetHeight;
+      const iframeHeight = totalHeight - headerHeight - footerHeight;
+
+      container.style.height = iframeHeight + "px";
+    }
+
+    // Teste si le navigateur supporte 100dvh correctement
+    const supports100dvh = window.CSS && CSS.supports("height", "100dvh");
+
+    if (!supports100dvh) {
+      adjustHeightFallback();
+      window.addEventListener("resize", adjustHeightFallback);
+    }
+  </script>

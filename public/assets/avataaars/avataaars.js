@@ -1,6 +1,6 @@
 const Avataaars = {
   defaultOptions: {
-    style:"circle",
+    style:"transparent",
   },
   create (options){
     var svg = this._createAvataaar({...this.defaultOptions, ...options});
@@ -171,8 +171,14 @@ const Avataaars = {
         pastelRed: '#FFAFB9',
         pastelYellow: '#FFFFB1',
         pink: '#FF488E',
+        purple: '#9828B8',
         red: '#FF5C5C',
+        brightRed: '#FF0000',        
+        brightBlue: '#0000FF',        
+        brightGreen: '#00FF00',        
+        brightYellow: '#FFFF00',        
         white: '#FFFFFF',
+
     },
     skin:{
         tanned: '#FD9841',
@@ -182,6 +188,8 @@ const Avataaars = {
         brown: '#D08B5B',
         darkBrown: '#AE5D29',
         black: '#614335',
+        reptile: '#508658',
+        smurf: '#31A4ED',
     }
   },
   paths: {

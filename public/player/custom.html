@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Joueur</title>
+    <link rel="stylesheet" href="./custom.css">
+    <link rel="stylesheet" href="../commonStyle.css">
+    <script src="../assets/avataaars/avataaars.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./custom.js"></script>
+    <script src="../globals.js"></script>
+</head> 
+<body>
+<div>
+    <div class="svg-container curseurs" id="avatar"></div>
+</div>
+<div class="curseurs">
+                <span onClick="moins('skin')">◄</span> &nbsp;Peau&nbsp; <span onClick="plus('skin')">►</span>
+</div>
+<div class="curseurs">
+                <span onClick="moins('top')">◄</span> &nbsp;Top&nbsp; <span onClick="plus('top')">►</span> 
+                <span onClick="moins('hairColor')">◄</span> &nbsp;C1&nbsp; <span onClick="plus('hairColor')">►</span> 
+                <span onClick="moins('hatColor')">◄</span> &nbsp;C2&nbsp; <span onClick="plus('hatColor')">►</span> 
+</div>
+<div class="curseurs">
+                <span onClick="moins('eyes')">◄</span> &nbsp;Yeux&nbsp; <span onClick="plus('eyes')">►</span>
+                <span onClick="moins('eyebrows')">◄</span> &nbsp;Sourcils&nbsp; <span onClick="plus('eyebrows')">►</span>
+</div>
+<div class="curseurs">
+                <span onClick="moins('accessories')">◄</span> &nbsp;Lunettes&nbsp; <span onClick="plus('accessories')">►</span>
+                <span onClick="moins('accessoriesColor')">◄</span> &nbsp;Couleur&nbsp; <span onClick="plus('accessoriesColor')">►</span>             </td>
+</div>
+<div class="curseurs">
+                <span onClick="moins('mouth')">◄</span> &nbsp;Bouche&nbsp; <span onClick="plus('mouth')">►</span>
+</div>
+<div class="curseurs">
+                <span onClick="moins('facialHair')">◄</span> &nbsp;Poils&nbsp; <span onClick="plus('facialHair')">►</span> 
+                <span onClick="moins('facialHairColor')">◄</span> &nbsp;Couleur&nbsp; <span onClick="plus('facialHairColor')">►</span> 
+</div>
+<div class="curseurs">
+                <span onClick="moins('clothing')">◄</span> &nbsp;Costume&nbsp; <span onClick="plus('clothing')">►</span> 
+                <span onClick="moins('clothingGraphic')">◄</span> &nbsp;Motif&nbsp; <span onClick="plus('clothingGraphic')">►</span>
+</div>
+<div class="curseurs">
+                <span onClick="moins('clothingColor')">◄</span> &nbsp;Couleur&nbsp; <span onClick="plus('clothingColor')">►</span> 
+</div>
+</body>
+</html>
