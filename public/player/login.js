@@ -1,5 +1,3 @@
-const socket = io('http://localhost:7780');
-
 function envoi() {
     if(V('pseudo') != "" && V('pwd') != "") {
         let data = {};
