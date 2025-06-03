@@ -11,11 +11,11 @@ function W(id, contenu) {
 }
 
 function hide(id) {
-        G(id).classList.add('cache');
+    G(id).classList.add('cache');
 }
 
 function show(id) {
-        G(id).classList.remove('cache');
+    G(id).classList.remove('cache');
 }
 
 function toggle(id) {

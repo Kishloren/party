@@ -1,29 +1,35 @@
 const express = require('express');
 const http = require('http');
 const {Server} = require('socket.io');
-
-
-const { sqlSelect, sqlExec } = require('../shared/common.js');
-//const { sqlSelect, sqlExec } = require('/home/ubuntu/shared/common.js');
+const cors = require('cors');
 
 
 const { v4: uuidv4 } = require('uuid');
 const app = express();
 const server = http.createServer(app);
 
-
-
-
+/* Bloc local */
+const { sqlSelect, sqlExec } = require('../shared/common.js');
 const io = new Server(server);
-// const io = new Server(server, {
-//   path: "/party/socket.io",  // <== Important
-//   cors: {
-//     origin: "https://www.stansgames.fr",
-//     methods: ["GET", "POST"],
-//     credentials: true
-//   }
-// }); 
 
+/* Bloc server */
+/*
+const { sqlSelect, sqlExec } = require('/home/ubuntu/shared/common.js');
+const io = new Server(server, {
+  path: "/party/socket.io",  // <== Important
+  cors: {
+    origin: "https://www.stansgames.fr",
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+}); 
+app.use(cors({
+  origin: "https://www.stansgames.fr",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+*/
 
 
 const multer = require('multer');
@@ -31,21 +37,15 @@ const fs = require('fs');
 const path = require('path');
 const appId = 3; // partie de Stan's Party
 const serverData = {};
-const cors = require('cors');
+
 const crypto = require('crypto');
 app.use(express.json());
 
-// app.use(cors({
-//   origin: "https://www.stansgames.fr",
-//   methods: ["GET", "POST"],
-//   allowedHeaders: ["Content-Type", "Authorization"],
-//   credentials: true
-// }));
 
 app.use(express.static('public'));
 
 server.listen(7780, () => {
-    console.log('listening on *:7790');
+    console.log('listening on *:7780');
 }); 
 
 // API endpoint to execute a SQL SELECT query
