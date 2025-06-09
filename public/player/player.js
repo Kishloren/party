@@ -27,6 +27,19 @@ socket.on('serverDonneesJoueur', (data) => {
 });
 
 
+socket.on('serverPrepareJeu', (data) => {
+    playerData.currentGame = data;
+    G('gameFrame').src = data.url;
+}) 
+
+socket.on('serverReadyJeu',() => {
+    J().prepare(playerData.currentGame);
+});
+
+socket.on('serverDepartJeu', () => {
+    J().demarre();
+});
+
 socket.on('connect', () => {
     console.log("Connected with ID:", socket.id);
     socket.emit('playerConnexion', playerData.myId);
@@ -59,4 +72,9 @@ function updateAvatar(avatarData) {
     playerData.me.avatar = avatarData;
     W('testAvatar',getAvatar(playerData.me.avatar));
     socket.emit('playerUpdateData', playerData.me);
+}
+
+function partieTerminee(resultat) {
+    resultat.playerId = playerData.myId;
+    socket.emit('playerFinJeu', resultat);
 }

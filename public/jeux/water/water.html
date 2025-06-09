@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>WaterWorks</title>
-  <link rel="stylesheet" href="water.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WaterWorks</title>
+    <link rel="stylesheet" href="./water.css" />
+    <link rel="stylesheet" href="../../commonStyle.css" />
+    <script src="../../globals.js"></script>
+    <script src="./water.js"></script>
 </head>
-<body>
-  <h1>💧 WaterWorks</h1>
-  <div id="grid"></div>
-  <button id="solveBtn">Résoudre</button>
-
-  <script src="water.js"></script>
+<body id="body">
+    <h1 id="titre">💧 WaterWorks</h1>
+    <div id="rules">Clique sur les cases pour créer un circuit continu entre le départ et l'arrivée.<br/>
+    <br/>Epreuve de vitesse, pas question de roupiller&nbsp;!
+    </div>
+    <div id="chrono" class="cache">0.0</div>
+    <div id="rebours" class="cache">3</div>
+    <div id="grid" class="cache"></div>
 </body>
 </html>

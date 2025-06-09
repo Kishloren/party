@@ -10,6 +10,10 @@ function W(id, contenu) {
     G(id).innerHTML = contenu;
 }
 
+function J() {
+    return G('gameFrame').contentWindow;
+}
+
 function hide(id) {
     G(id).classList.add('cache');
 }

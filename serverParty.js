@@ -1,39 +1,34 @@
+require('dotenv').config();
+const isProd = process.env.ENV === 'PROD';
 const express = require('express');
 const http = require('http');
 const {Server} = require('socket.io');
 const cors = require('cors');
 
-
 const { v4: uuidv4 } = require('uuid');
 const app = express();
 const server = http.createServer(app);
-
+console.log("IS PROD : " + isProd);
 /* Bloc local */
-const { sqlSelect, sqlExec } = require('../shared/common.js');
-const io = new Server(server);
-
-/* Bloc server */
-/*
-const { sqlSelect, sqlExec } = require('/home/ubuntu/shared/common.js');
-const io = new Server(server, {
+const { sqlSelect, sqlExec } = isProd ? require('/home/ubuntu/shared/common.js') : require('../shared/common.js');
+const io = isProd ? new Server(server, {
   path: "/party/socket.io",  // <== Important
   cors: {
     origin: "https://www.stansgames.fr",
     methods: ["GET", "POST"],
     credentials: true
   }
-}); 
-app.use(cors({
-  origin: "https://www.stansgames.fr",
-  methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
-*/
+}) :  new Server(server);
 
+if(isProd) {
+    app.use(cors({
+    origin: "https://www.stansgames.fr",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
+    }));
+}
 
-const multer = require('multer');
-const fs = require('fs');
 const path = require('path');
 const appId = 3; // partie de Stan's Party
 const serverData = {};
@@ -73,10 +68,6 @@ app.post('/api/exec', async (req, res) => {
     res.sendStatus(500);
   }
 });
-
-
-
-
 
 // lancement d'une nouvelle partie, au démarrage du serveur
 serverData.uuidPartieCourante = uuidv4();
@@ -146,6 +137,8 @@ io.on('connection', (socket) => {
                     // récupération des données et envoi au joueur
                     reconnecterJoueur(joueurId);
                 }
+                //console.log(JSON.stringify(serverData.joueurs));
+                io.emit('serverTousJoueurs', serverData.joueurs);
             } catch (err) {
                 console.error('Error executing query:', err);
             } 
@@ -167,9 +160,92 @@ io.on('connection', (socket) => {
     socket.on('animationEtatServeur', () => {
         console.log(JSON.stringify(serverData));
     });
+
+    socket.on('displayReady', () => {
+        console.log('Display ready');
+        //socket.emit('serverTousJoueurs', serverData.joueurs);
+    });
+
+    socket.on('animationPrepareJeu', (name) => {
+        let data = {};
+        switch(name) {
+            case 'water' :
+                data.titre = 'Water works';
+                data.url = '../jeux/water/water.html';
+                data.imageTitre = '../jeux/water/assets/waterTitle.png';
+                data.pisteSonore = '../jeux/water/assets/yaketi.mp3';
+                data.nbCols = 4;
+                data.nbRows = 4;
+                data.maxDuration = 20000;
+                data.seed = de(100000);
+        }
+        serverData.jeuCourant = data;
+        serverData.resultatsJeuCourant = [];
+        io.emit('serverPrepareJeu', data);
+    });
+
+    socket.on('animationReadyJeu', () => {
+        io.emit('serverReadyJeu');
+    });
+
+    socket.on('animationDepartJeu', () => {
+        io.emit('serverDepartJeu');
+    });
+
+    socket.on('playerFinJeu', (data) => {
+
+        serverData.resultatsJeuCourant.push(data);
+        if(serverData.resultatsJeuCourant.length == serverData.joueurs.length) {
+            calculResultat();
+        }
+    });
+
+    socket.on('animationDemandeResultat', () => {
+        io.emit('serverResultatsCoup', serverData.resultatsJeuCourant);
+    })
+
+    socket.on('animationDemandeScores', () => {
+        majScores();
+    })
 }); 
  
- 
+function calculResultat() {
+
+    serverData.resultatsJeuCourant.sort((j1, j2) => {
+        if(j1.gagne != j2.gagne) {
+            return j1.gagne;
+        }
+
+        if(j1.temps != j2.temps) {
+            return j1.temps - j2.temps;
+        }
+
+        return(j1.actions - j2.actions);
+    });
+
+    for(let i=0;i<serverData.resultatsJeuCourant.length;i++) {
+        let nbPoints = serverData.resultatsJeuCourant.length - i;
+        if(serverData.resultatsJeuCourant[i].gagne) {
+            serverData.resultatsJeuCourant[i].nbPoints = nbPoints;
+        } else {
+            serverData.resultatsJeuCourant[i].nbPoints = 0;
+        }
+        serverData.resultatsJeuCourant[i].avatar = getById(serverData.joueurs, serverData.resultatsJeuCourant[i].playerId).avatar;
+        serverData.resultatsJeuCourant[i].pseudo = getById(serverData.joueurs, serverData.resultatsJeuCourant[i].playerId).pseudo;
+        getById(serverData.joueurs, serverData.resultatsJeuCourant[i].playerId).score += serverData.resultatsJeuCourant[i].nbPoints;
+    }
+}
+
+function majScores() {
+    serverData.joueurs.sort((j1, j2) => {
+        if(j1.score != j2.score) {
+            return j2.score - j1.score;
+        }
+        return (j1.pseudo.localeCompare(j2.pseudo));
+    });
+    //console.log(JSON.stringify(serverData.joueurs));
+    io.emit('serverAllScores', serverData.joueurs);
+}
 
 function ajouterJoueur(joueurId) {
 
@@ -195,8 +271,8 @@ function ajouterJoueur(joueurId) {
                     query = "INSERT INTO parties (idjoueur, idapp, dernierepartie, jsondata)";
                     query += " VALUES('" + joueurId + "'," + appId + ",'" + serverData.uuidPartieCourante + "','" + JSON.stringify(nouveauJoueur) + "')";
                     await sqlExec(query);
-                    console.log("Joueur ajouté : " + joueurId);
-                    io.emit('serverDonneesJoueur', nouveauJoueur);
+                    //console.log("Joueur ajouté : " + joueurId);
+
                 } catch (err) {
                     console.error('Error executing query:', err);
                 } 
@@ -215,6 +291,7 @@ function reconnecterJoueur(id) {
             io.emit('serverDonneesJoueur', j);
         }
      }
+     io.emit('serverTousJoueurs', serverData.joueurs);
 }
 
 
@@ -225,4 +302,8 @@ function getById(tab, id) {
         }
     }
     return null;
+}
+
+function de(nbFaces) {
+    return 1 + Math.floor(Math.random() * nbFaces);
 }

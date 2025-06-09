@@ -10,3 +10,27 @@ document.addEventListener('DOMContentLoaded', () => {
 function debutPartie() {
     socket.emit('animationSkip');
 }
+
+function jeu(name) {
+    socket.emit('animationPrepareJeu', name);
+}
+
+function ready() {
+    socket.emit('animationReadyJeu');
+}
+
+function depart() {
+    socket.emit('animationDepartJeu');
+}
+
+function fin() {
+    socket.emit('animationFinJeu')
+}
+
+function resultat() {
+    socket.emit('animationDemandeResultat');
+}
+
+function score() {
+    socket.emit('animationDemandeScores');
+}

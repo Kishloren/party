@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jeu de Taps</title>
+    <link rel="stylesheet" href="./tap.css">
+    <link rel="stylesheet" href="../../commonStyle.css">
+</head>
+<body>
+  <h1>Jeu de Tap</h1>
+  <div id="status">Prépare-toi...</div>
+  <div id="gameBox"></div>
+  <div id="count">Taps : 0</div>
+
+  <script>
+    const box = document.getElementById("gameBox");
+    const countDisplay = document.getElementById("count");
+    const statusDisplay = document.getElementById("status");
+
+    let tapCount = 0;
+    let gameStarted = false;
+    let countdown = 3;
+    let gameDuration = 10;
+
+    // Empêcher zoom, scroll, etc.
+    document.addEventListener('gesturestart', e => e.preventDefault());
+    document.addEventListener('dblclick', e => e.preventDefault());
+    document.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+
+    // Début du compte à rebours
+    const startCountdown = setInterval(() => {
+      if (countdown > 0) {
+        statusDisplay.textContent = `Départ dans ${countdown}...`;
+        countdown--;
+      } else {
+        clearInterval(startCountdown);
+        statusDisplay.textContent = "Tap tap tap !";
+        gameStarted = true;
+        startGame();
+      }
+    }, 1000);
+
+    function startGame() {
+      tapCount = 0;
+      countDisplay.textContent = `Taps : ${tapCount}`;
+
+      const timer = setTimeout(() => {
+        gameStarted = false;
+        statusDisplay.textContent = `Terminé ! Score : ${tapCount}`;
+      }, gameDuration * 1000);
+
+      box.addEventListener("touchstart", handleTap, { passive: false });
+    }
+
+    function handleTap(e) {
+      if (!gameStarted) return;
+      e.preventDefault(); // Empêche tout comportement par défaut
+      tapCount++;
+      countDisplay.textContent = `Taps : ${tapCount}`;
+    }
+  </script>
+</body>
+</html>

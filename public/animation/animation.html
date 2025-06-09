@@ -6,7 +6,7 @@
     <title>Animation</title>
     <link rel="stylesheet" href="./animation.css">
     <link rel="stylesheet" href="../commonStyle.css">
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="../socket.js"></script>
     <script src="./animation.js"></script>
     <script src="../globals.js"></script>
@@ -15,6 +15,24 @@
     <table>
         <tr>
             <td colspan="12"><button onClick="debutPartie()">Début partie</button></td>
+        </tr>
+        <tr>
+            <td colspan="12"><button onClick="jeu('water')">Jeu tuyaux</button></td>
+        </tr>
+        <tr>
+            <td colspan="12">&nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="4"><button onclick="ready()">!</button></td>
+            <td colspan="4"><button onclick="depart()">Go</button></td>
+            <td colspan="4"><button onclick="fin()">Fin</button></td>
+        </tr>        
+        <tr>
+            <td colspan="12">&nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="6"><button onclick="resultat()">Résultat</button></td>
+            <td colspan="6"><button onclick="score()">Score</button></td>
         </tr>
     </table>
 </body>

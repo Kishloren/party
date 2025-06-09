@@ -6,13 +6,14 @@
     <title>Oyez, Oh Yeah !</title>
     <link rel="stylesheet" href="./display.css">
     <link rel="stylesheet" href="../commonStyle.css"> 
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="../assets/avataaars/avataaars.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="../socket.js"></script>
     <script src="../globals.js"></script>    
     <script src="./display.js"></script>
 </head>
 <body class="gradient">
-  <img width=1920 height=1080 src="../assets/images/generiqueW.png" onClick="cacherSplashscreen()" class="splashscreen" id="splashscreen" />
+  <!-- <img width=1920 height=1080 src="../assets/images/generiqueW.png" onClick="cacherSplashscreen()" class="splashscreen" id="splashscreen" /> -->
   <header>
     <h1>Stan Party</h1>
     <span class="spacer"></span>
@@ -23,14 +24,14 @@
   </header>
   <main>
     <section class="left-column" id="colJoueurs">
-        <table class="listeJoueurs text-with-stroke" id="listeScores">
+        <table class="listeJoueurs" id="listeScores">
         </table>
     </section>
     <div class="middle-column">
         <div class="container">
             <div id="info" class="top neon-static">&nbsp;</div>
             <div class="middle">
-                <img id="imageCentrale" class="imageCentrale" width="700" height="700" src="../assets/images/qrcode.png">
+                <img id="imageCentrale" class="imageCentrale" width="700" height="700" src="../assets/images/qrcode.png"/>
             </div>
             <div id="conteneurCompteurs" class="conteneurCompteur">
                 <div id="compteurs" class="compteurs bottom">

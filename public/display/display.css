@@ -52,7 +52,6 @@
     padding: 15px;
     box-sizing: border-box;
     border-radius: 10px;
-    overflow-y: hidden;
   }
   
   .left-column table.scroll{

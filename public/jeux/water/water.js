@@ -1,5 +1,18 @@
-const rows = 5;
-const cols = 5;
+var rows = 6;
+var cols = 5;
+var solution;
+var startTime;
+var timer;
+var maxTimer;
+var car = 3;
+var nbRotations = 0;
+const STATE_TITRE = 1;
+const STATE_CHRONO = 2;
+const STATE_JEU = 3;
+const STATE_FINI = 4;
+const gameData = {};
+gameData.state = STATE_TITRE;
+var resultat = {};
 
 // Directions pour construire le chemin
 const directions = [
@@ -66,11 +79,16 @@ class Tile {
 
 // Génération du puzzle : chemin Hamiltonien avec 2 connexions par case, sans T ni croix
 function generatePuzzle(rows, cols, seed) {
+
   const rng = createRNG(seed);
   const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
   const connections = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => [])
   );
+
+  const grid = document.getElementById("grid");
+  grid.style.gridTemplateRows = `repeat(4, 60px)`;
+  grid.style.gridTemplateColumns = `repeat(4, 60px)`;
 
   const path = [];
 
@@ -174,14 +192,15 @@ function drawGrid(puzzle) {
     el.style.transform = `rotate(${tile.rot}deg)`;
 
     if (tile.x === start.x && tile.y === start.y) el.classList.add("start");
-    if (tile.x === end.x && tile.y === end.y) el.classList.add("end");
+    if (tile.type === 'empty' & (tile.x != start.x || tile.y != start.y)) el.classList.add("end");
 
-    el.addEventListener("click", () => {
+    el.addEventListener("pointerdown", () => {
+      nbRotations++;
       tile.rot = (tile.rot + 90);
       el.style.transform = `rotate(${tile.rot}deg)`;
 
       if (checkSolution(puzzle.tiles, solution.tiles)) {
-        alert("🎉 Félicitations, tu as reconstitué le circuit !");
+        setTimeout(messageFin, 200);
       }
     });
 
@@ -189,20 +208,119 @@ function drawGrid(puzzle) {
   }
 }
 
+function messageFin() {
+  clearInterval(timer);
+
+  resultat.gagne = true;
+  resultat.actions = nbRotations;
+  resultat.temps = G('chrono').innerHTML;
+  G('body').classList.add('gagne');
+  clearTimeout(maxTimer);
+  finCoup();
+}
+
+function finCoup() {
+  gameData.state = STATE_FINI;
+
+  document.querySelectorAll(".tile").forEach(tileEl => {
+    tileEl.replaceWith(tileEl.cloneNode(true));
+  });
+  parent.partieTerminee(resultat);
+}
 // --- Initialisation ---
+function prepare(data) {
+  gameData.maxDuration = data.maxDuration;
+  const seed = data.seed;
+  const rng = createRNG(seed);
+  rows = data.nbRows;
+  cols = data.nbCols;
 
-const seed = 12345;
-const rng = createRNG(seed);
+  solution = generatePuzzle(data.nbRows, data.nbCols, seed);
 
-const solution = generatePuzzle(rows, cols, seed);
+  // Cloner les tiles pour la partie en cours (rotation modifiable)
+  const puzzle = {
+    tiles: solution.tiles.map(t => ({ ...t })),
+    start: solution.start,
+    end: solution.end
+  };
 
-// Cloner les tiles pour la partie en cours (rotation modifiable)
-const puzzle = {
-  tiles: solution.tiles.map(t => ({ ...t })),
-  start: solution.start,
-  end: solution.end
-};
+  randomizeRotations(puzzle.tiles, rng);
 
-randomizeRotations(puzzle.tiles, rng);
+  drawGrid(puzzle);
 
-drawGrid(puzzle);
+  document.addEventListener('gesturestart', e => e.preventDefault());
+  document.addEventListener('dblclick', e => e.preventDefault());
+  document.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+
+  if(gameData.state == STATE_TITRE) {
+    gameData.state = STATE_CHRONO;
+    hide('rules');
+    hide('titre');
+    show('chrono');
+  }
+}
+
+function demarre() {
+  if(gameData.state == STATE_CHRONO) {
+    gameData.state = STATE_JEU;
+    show('rebours');
+    setTimeout(decrementeCAR, 1000);
+  }
+}
+
+function decrementeCAR() {
+  if(car == 1) {
+    lanceJeu();
+  } else {
+    W('rebours', --car);
+    setTimeout(decrementeCAR, 1000);
+  }
+}
+
+function lanceJeu() {
+  hide('rebours');
+  show('grid');
+  startTime = Date.now();
+
+  timer = setInterval(() => {
+    const duree = Math.floor((Date.now() - startTime) / 100);
+    W('chrono', duree / 10.);
+  }, 100);
+  
+  maxTimer = setTimeout(finForcee, gameData.maxDuration);
+}
+
+function finForcee() {
+  G('body').classList.add('perdu');
+  clearInterval(timer);
+  resultat.gagne = false;
+  resultat.actions = nbRotations;
+  resultat.temps = G('chrono').innerHTML;
+  parent.partieTerminee(resultat);
+  document.querySelectorAll(".tile").forEach(tileEl => {
+    tileEl.replaceWith(tileEl.cloneNode(true));
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+// const seed = 12345;
+// const rng = createRNG(seed);
+
+// solution = generatePuzzle(rows, cols, seed);
+
+// // Cloner les tiles pour la partie en cours (rotation modifiable)
+// const puzzle = {
+//   tiles: solution.tiles.map(t => ({ ...t })),
+//   start: solution.start,
+//   end: solution.end
+// };
+
+// randomizeRotations(puzzle.tiles, rng);
+
+// drawGrid(puzzle);
+
+// document.addEventListener('gesturestart', e => e.preventDefault());
+// document.addEventListener('dblclick', e => e.preventDefault());
+// document.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+});
+
